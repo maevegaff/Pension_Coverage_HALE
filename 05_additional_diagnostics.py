@@ -1,19 +1,17 @@
 """
 05_additional_diagnostics.py
 
-Pension Coverage & Healthy Life Expectancy (HALE) Study
 Four additional diagnostic checks not included in 02_analyze_data.py:
 
-  1. VIF (Variance Inflation Factor) — flags multicollinearity above 10
-  2. Breusch-Pagan test — tests for heteroskedasticity in residuals
-  3. GDP subsample table — coefficient on log GDP per capita by income group,
+  1. VIF (Variance Inflation Factor)
+  2. Breusch-Pagan test 
+  3. GDP subsample table _> coefficient on log GDP per capita by income group,
      checking whether it moves in the expected direction (positive, larger in
      lower income groups)
-  4. First-difference model — an alternative to fixed effects that differences
-     out country-level unobservables; coefficient should be directionally
-     consistent with the primary FE result if the model is robust
+  4. First-difference model — an alternative to fixed effects
 
-Runs for BOTH pension models (contributory and social) and saves results to:
+Runs for BOTH pension models (contributory and social) and 
+saves results to:
     outputs/additional_diagnostics_contributory.xlsx
     outputs/additional_diagnostics_social.xlsx
 
@@ -34,9 +32,9 @@ from openpyxl.utils import get_column_letter
 warnings.filterwarnings("ignore")
 pd.set_option("display.width", 120)
 
-# =============================================================================
+
 # CONFIG
-# =============================================================================
+
 
 CLEANED_PANEL_PATH = "cleaned_data/cleaned_panel.csv"
 OUT_DIR = "outputs"
@@ -66,9 +64,9 @@ PENSION_MODELS = {
 VIF_FLAG_THRESHOLD = 10
 
 
-# =============================================================================
+
 # HELPERS
-# =============================================================================
+
 
 def load_panel():
     df = pd.read_csv(CLEANED_PANEL_PATH)
@@ -96,9 +94,9 @@ def get_model_df(df, model_spec):
     return df.dropna(subset=[DEPENDENT_VAR] + regressors), regressors
 
 
-# =============================================================================
+
 # DIAGNOSTIC 1: VIF
-# =============================================================================
+
 
 def run_vif(df, model_spec):
     """
@@ -141,9 +139,9 @@ def run_vif(df, model_spec):
     return results
 
 
-# =============================================================================
+
 # DIAGNOSTIC 2: BREUSCH-PAGAN TEST
-# =============================================================================
+
 
 def run_breusch_pagan(df, model_spec):
     """
@@ -192,9 +190,9 @@ def run_breusch_pagan(df, model_spec):
     return result
 
 
-# =============================================================================
+
 # DIAGNOSTIC 3: GDP SUBSAMPLE TABLE BY INCOME GROUP
-# =============================================================================
+
 
 def run_gdp_subsample(df, model_spec):
     """
@@ -259,20 +257,16 @@ def run_gdp_subsample(df, model_spec):
     return results
 
 
-# =============================================================================
+
 # DIAGNOSTIC 4: FIRST-DIFFERENCE MODEL
-# =============================================================================
 
 def run_first_difference(df, model_spec):
     """
     First-difference (FD) model: differences out country fixed effects by
     subtracting year t-1 from year t within each country. Consistent with
     FE under strict exogeneity but more efficient when errors follow a
-    random walk. The pension coverage coefficient should be directionally
-    consistent with the primary FE result -- divergence warrants discussion.
-    Note: time fixed effects cannot be included in FD alongside
-    FirstDifferenceOLS; year dummies would be perfectly collinear with the
-    differencing. We include year dummies manually instead.
+    random walk. 
+   
     """
     print(f"\n[Diag 4 -- First Difference] {model_spec['label']}")
     c_col  = model_spec["c_col"]
@@ -353,9 +347,9 @@ def run_first_difference(df, model_spec):
     return result
 
 
-# =============================================================================
+
 # EXCEL OUTPUT
-# =============================================================================
+
 
 def write_diagnostics_excel(vif_res, bp_res, gdp_res, fd_res, label, out_path):
     wb = Workbook()
@@ -407,7 +401,7 @@ def write_diagnostics_excel(vif_res, bp_res, gdp_res, fd_res, label, out_path):
             if fill: cell.fill = fill
     ws1.freeze_panes = "A4"
 
-    # ---- Sheet 2: Breusch-Pagan ----
+    #  Sheet 2: Breusch-Pagan 
     ws2 = wb.create_sheet("Diag 2 Breusch-Pagan")
     title_row(ws2, f"{label} — Breusch-Pagan Test for Heteroskedasticity", 2)
     ws2.merge_cells("A2:B2")
@@ -435,7 +429,7 @@ def write_diagnostics_excel(vif_res, bp_res, gdp_res, fd_res, label, out_path):
     ws2.row_dimensions[9].height = 30
     ws2.freeze_panes = "A4"
 
-    # ---- Sheet 3: GDP Subsample ----
+    #  Sheet 3: GDP Subsample 
     ws3 = wb.create_sheet("Diag 3 GDP Subsample")
     title_row(ws3, f"{label} — Log GDP per Capita Coefficient by Income Group", 8)
     ws3.merge_cells("A2:H2")
@@ -464,7 +458,7 @@ def write_diagnostics_excel(vif_res, bp_res, gdp_res, fd_res, label, out_path):
             if fill: cell.fill = fill
     ws3.freeze_panes = "A4"
 
-    # ---- Sheet 4: First Difference ----
+    # Sheet 4: First Difference 
     ws4 = wb.create_sheet("Diag 4 First Difference")
     title_row(ws4, f"{label} — First-Difference Model (Alternative to FE)", 2)
     ws4.merge_cells("A2:B2")
@@ -499,9 +493,9 @@ def write_diagnostics_excel(vif_res, bp_res, gdp_res, fd_res, label, out_path):
     print(f"\nSaved to {out_path}")
 
 
-# =============================================================================
+
 # MAIN
-# =============================================================================
+
 
 def main():
     import os

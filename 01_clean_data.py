@@ -2,18 +2,6 @@
 01_clean_data.py
 
 Pension Coverage & Healthy Life Expectancy (HALE) Study
-Pipeline Steps 1-7: Load raw data -> harmonize -> restrict period -> merge ->
-handle missingness -> check implausible values -> construct derived variables.
-
-TWO-VARIABLE PENSION DESIGN: contributory and social (non-contributory)
-pension coverage are kept as separate variables throughout, rather than
-combined into one "any pension" measure -- see project discussion. This
-means: (1) HALE is still required for every retained row, but pension
-coverage is NOT required -- each of the two pension variables is allowed to
-be missing independently, since 02_analyze_data.py runs two separate models
-(contributory-only, social-only) and each model does its own listwise
-deletion on just the variable it needs; (2) Step 7 builds two full sets of
-derived terms (centered, squared, income-group interactions) instead of one.
 
 Study window: 2000-2019 (narrowed from the original 2000-2022 -- see project
 discussion on pension data availability).
@@ -28,9 +16,8 @@ import pycountry
 
 pd.set_option("display.width", 120)
 
-# =============================================================================
-# CONFIG -- edit this section to match your actual files
-# =============================================================================
+
+#  edit this section to match actual files paths
 
 RAW_DIR = r"C:\Users\maeve\Downloads\FinDiss\data"
 OUT_DIR = "cleaned_data"
@@ -105,9 +92,8 @@ HALE_MAX_PLAUSIBLE = 35
 
 MISSING_FLAG_THRESHOLD = 0.15
 
-# =============================================================================
-# STEP 1: LOAD RAW DATA
-# =============================================================================
+# LOAD RAW DATA
+
 
 def load_source(name, spec):
     print(f"\n[Step 1] Loading '{name}' from {spec['path']}")
@@ -131,9 +117,9 @@ def load_source(name, spec):
     return df
 
 
-# =============================================================================
-# STEP 2: HARMONIZE COUNTRY IDENTIFIERS
-# =============================================================================
+
+#  HARMONIZE COUNTRY IDENTIFIERS
+
 
 VALID_ISO3 = {c.alpha_3 for c in pycountry.countries}
 
@@ -156,9 +142,7 @@ def harmonize_countries(df, name):
     return df
 
 
-# =============================================================================
-# STEP 3: RESTRICT TO STUDY PERIOD
-# =============================================================================
+# RESTRICT TO STUDY PERIOD
 
 def restrict_period(df, name):
     before = len(df)
@@ -168,9 +152,7 @@ def restrict_period(df, name):
     return df
 
 
-# =============================================================================
-# STEP 4: MERGE INTO ONE COUNTRY-YEAR PANEL
-# =============================================================================
+#  MERGE INTO ONE COUNTRY-YEAR PANEL
 
 def merge_panel(frames):
     print("\n[Step 4] Merging sources into one country-year panel")
@@ -195,9 +177,9 @@ def merge_panel(frames):
     return panel
 
 
-# =============================================================================
-# STEP 5: MISSINGNESS ASSESSMENT AND HANDLING
-# =============================================================================
+
+#  MISSINGNESS ASSESSMENT AND HANDLING
+
 
 def assess_missingness(panel):
     print("\n[Step 5] Missingness report (% missing per variable)")
@@ -220,20 +202,7 @@ def assess_missingness(panel):
 
 
 def handle_missingness(panel):
-    """
-    HALE is required for every retained row (it's the dependent variable for
-    every model). Pension coverage is deliberately NOT required here --
-    pension_contributory and pension_social are each missing independently
-    in most rows, and 02_analyze_data.py runs two separate models (one per
-    pension type), each doing its own listwise deletion on just the variable
-    it needs. Dropping rows missing EITHER pension variable at this stage
-    would needlessly throw away usable rows for both models.
-
-    Control variables get small within-country gaps filled via interpolation,
-    same as before. Pension coverage is NOT interpolated -- it's a sparse,
-    central explanatory variable, and fabricating points for it via
-    interpolation would risk manufacturing the very relationship being tested.
-    """
+    
     print("\n[Step 6 prep] Handling missingness")
     before = len(panel)
 
@@ -253,9 +222,9 @@ def handle_missingness(panel):
     return panel
 
 
-# =============================================================================
-# STEP 6: IMPLAUSIBLE VALUE / OUTLIER CHECKS
-# =============================================================================
+
+# IMPLAUSIBLE VALUE / OUTLIER CHECKS
+
 
 def check_implausible_values(panel):
     print("\n[Step 6] Implausible value checks")
@@ -279,9 +248,8 @@ def check_implausible_values(panel):
     return panel
 
 
-# =============================================================================
-# STEP 7: CONSTRUCT DERIVED VARIABLES (two full sets -- one per pension type)
-# =============================================================================
+# CONSTRUCT DERIVED VARIABLES (two full sets -- one per pension type)
+
 
 def construct_derived_variables(panel):
     print("\n[Step 7] Constructing derived variables (two-variable pension design)")
@@ -312,9 +280,9 @@ def construct_derived_variables(panel):
     return panel
 
 
-# =============================================================================
+
 # FINAL PANEL CHECK
-# =============================================================================
+
 
 def final_panel_check(panel):
     print("\n[Final check] Cleaned panel summary")
@@ -335,9 +303,8 @@ def final_panel_check(panel):
               f"{n_countries_with_data} countries ({n_present / n_obs * 100:.1f}% of panel)")
 
 
-# =============================================================================
 # MAIN
-# =============================================================================
+
 
 def main():
     import os

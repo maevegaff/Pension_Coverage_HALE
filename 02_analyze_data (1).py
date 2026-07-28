@@ -1,20 +1,8 @@
 """
 02_analyze_data.py
 
-Pension Coverage & Healthy Life Expectancy (HALE) Study
-Pipeline Steps 8-12: Descriptives -> Hausman test -> primary two-way FE model
+ Descriptives -> Hausman test -> primary two-way FE model
 -> interpretation -> robustness checks (lags, split-sample, IV).
-
-TWO-VARIABLE PENSION DESIGN: contributory and social (non-contributory)
-pension coverage are tested as two SEPARATE mechanisms, each with its own
-model (own Hausman test, own primary FE model, own H1/H2 interpretation,
-own robustness checks), rather than one combined model requiring both
-variables to be present. This follows directly from 01_clean_data.py, which
-does NOT listwise-delete on pension coverage -- each model below does its
-own deletion on just the variable it needs, which is why the two models end
-up with different (and non-overlapping) sample sizes. See project
-discussion for the reasoning and the real sample-size numbers behind this
-choice.
 
 INPUT:  cleaned_data/cleaned_panel.csv  (produced by 01_clean_data.py)
 OUTPUT: Printed results + result summary CSVs in outputs/ (one set per
@@ -33,9 +21,9 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 pd.set_option("display.width", 120)
 
-# =============================================================================
+
 # CONFIG
-# =============================================================================
+
 
 CLEANED_PANEL_PATH = r"C:\Users\maeve\Downloads\FinDiss\data\cleaned_panel.csv"
 OUT_DIR = r"C:\Users\maeve\Downloads\FinDiss\data\outputs"
@@ -69,9 +57,8 @@ PENSION_MODELS = {
 }
 
 
-# =============================================================================
+
 # HELPERS
-# =============================================================================
 
 def load_panel():
     df = pd.read_csv(CLEANED_PANEL_PATH)
@@ -91,9 +78,9 @@ def build_regressors(df, model_spec):
     return [model_spec["c_col"], model_spec["sq_col"]] + CONTROL_VARS + income_dummies + interactions
 
 
-# =============================================================================
-# STEP 8: DESCRIPTIVE STATISTICS (both pension variables shown together for context)
-# =============================================================================
+
+# DESCRIPTIVE STATISTICS (both pension variables shown together for context)
+
 
 def descriptive_checks(df):
     print("=" * 70)
@@ -115,9 +102,8 @@ def descriptive_checks(df):
     return desc
 
 
-# =============================================================================
-# STEP 9: HAUSMAN TEST
-# =============================================================================
+
+# HAUSMAN TEST
 
 def hausman_test(df, regressors, label):
     print(f"\n[Step 9 -- {label}] Hausman test (fixed effects vs random effects)")
@@ -153,9 +139,8 @@ def hausman_test(df, regressors, label):
     return fe_res, re_res
 
 
-# =============================================================================
-# STEP 10: PRIMARY TWO-WAY FIXED EFFECTS MODEL
-# =============================================================================
+
+# PRIMARY TWO-WAY FIXED EFFECTS MODEL 
 
 def primary_model(df, regressors, label):
     print(f"\n[Step 10 -- {label}] Primary model: two-way fixed effects, clustered SEs")
@@ -167,9 +152,9 @@ def primary_model(df, regressors, label):
     return res
 
 
-# =============================================================================
-# STEP 11: INTERPRETATION
-# =============================================================================
+
+# INTERPRETATION
+
 
 def interpret_results(res, model_spec, label):
     print(f"\n[Step 11 -- {label}] Interpretation against hypotheses")
@@ -194,9 +179,9 @@ def interpret_results(res, model_spec, label):
             report(v, f"  {v}")
 
 
-# =============================================================================
-# STEP 12: ROBUSTNESS CHECKS
-# =============================================================================
+
+# ROBUSTNESS CHECKS
+
 
 def robustness_lagged(df, regressors, model_spec, label):
     print(f"\n[Step 12a -- {label}] Robustness: lagged coverage (1-3 years)")
@@ -298,9 +283,8 @@ def robustness_iv(df, model_spec, label):
         print(f"  -> IV model failed to estimate ({e})")
 
 
-# =============================================================================
-# RUN ONE FULL MODEL (steps 9-12) FOR ONE PENSION VARIABLE
-# =============================================================================
+
+# RUN ONE FULL MODEL FOR ONE PENSION VARIABLE
 
 def run_pension_model(df, model_key, model_spec):
     label = model_spec["label"]
@@ -328,7 +312,7 @@ def run_pension_model(df, model_key, model_spec):
     robustness_split_sample(model_df, model_spec, label)
     robustness_iv(model_df, model_spec, label)
 
-    # --- Save FULL coefficient table (all variables including controls) ---
+    #  Save FULL coefficient table (all variables including controls) 
     # Human-readable variable labels for the results table
     VARIABLE_LABELS = {
         model_spec["c_col"]:           "Pension coverage (centered)",
@@ -473,9 +457,8 @@ def run_pension_model(df, model_key, model_spec):
     return primary_res
 
 
-# =============================================================================
 # MAIN
-# =============================================================================
+
 
 def main():
     import os

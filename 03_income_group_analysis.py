@@ -1,10 +1,6 @@
 """
 03_income_group_analysis.py
 
-Pension Coverage & Healthy Life Expectancy (HALE) Study
-Split-sample analysis by World Bank income group -- a direct test of H1
-(that the pension-HALE relationship is stronger in lower income countries).
-
 Runs both the contributory and social pension models separately for each
 income group (Low, Lower middle, Upper middle, High), saves a formatted
 Excel table comparing coefficients across groups, and flags groups where
@@ -28,9 +24,8 @@ from openpyxl.utils import get_column_letter
 warnings.filterwarnings("ignore")
 pd.set_option("display.width", 120)
 
-# =============================================================================
+
 # CONFIG
-# =============================================================================
 
 CLEANED_PANEL_PATH = "cleaned_data/cleaned_panel.csv"
 OUT_DIR = "outputs"
@@ -61,9 +56,8 @@ PENSION_MODELS = {
 }
 
 
-# =============================================================================
+
 # HELPERS
-# =============================================================================
 
 def load_panel():
     df = pd.read_csv(CLEANED_PANEL_PATH)
@@ -136,9 +130,9 @@ def run_group_model(df, group, model_spec):
     return result
 
 
-# =============================================================================
+
 # EXCEL OUTPUT
-# =============================================================================
+
 
 def write_excel(all_results, out_path):
     wb = Workbook()
@@ -237,9 +231,8 @@ def write_excel(all_results, out_path):
     print(f"\nSaved income group analysis table to {out_path}")
 
 
-# =============================================================================
 # MAIN
-# =============================================================================
+
 
 def main():
     import os
